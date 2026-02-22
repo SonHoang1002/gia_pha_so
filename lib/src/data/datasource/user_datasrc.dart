@@ -2,13 +2,21 @@ import 'package:gia_pha_so/app/util/asset_util.dart';
 import 'package:gia_pha_so/src/data/model/user_model.dart';
 
 class UserDataSource {
-  Future<UserModel> getUserByUser({
-    required String name,
+  Future<List<UserModel>> getUsers() async {
+    final result = await AssetUtil.load("users.json");
+    return result.map((e) => UserModel.fromJson(e)).toList();
+  }
+
+  Future<UserModel?> getUserByUser({
+    required String emailOrName,
     required String password,
-    required String email,
   }) async {
-    final result = await AssetUtil.loadJson("users.json");
-    return UserModel.fromJson(result);
+    List<UserModel> allUser = await getUsers();
+    UserModel? target = allUser.where((element) {
+      return element.password == password ||
+          (element.name == emailOrName || element.email == emailOrName);
+    }).firstOrNull;
+    return target;
   }
 
   Future<dynamic> createUser({
@@ -16,9 +24,9 @@ class UserDataSource {
     required String password,
     required String email,
   }) async {
-    var data = await AssetUtil.loadJsonList("users.json");
+   
     final newUser = UserModel(name: name, password: password, email: email);
-    data.add(newUser.toJson());
+   
     return newUser;
   }
 }

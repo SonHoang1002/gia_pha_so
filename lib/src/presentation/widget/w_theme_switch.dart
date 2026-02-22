@@ -108,7 +108,7 @@ class WThemeSwitchState extends State<WThemeSwitch>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(widget.height / 2),
           border: Border.all(
             color: Theme.of(context).colorScheme.outlineVariant,

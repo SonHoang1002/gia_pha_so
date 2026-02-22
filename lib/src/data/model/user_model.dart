@@ -110,3 +110,34 @@ class UserModel {
     return UserEntity(name: name, password: password, email: email);
   }
 }
+
+class UserLoginDataModel {
+  final String phoneOrEmail;
+  final String password;
+  UserLoginDataModel({required this.password, required this.phoneOrEmail});
+  Map<String, dynamic> toJson() {
+    return {'phoneOrEmail': phoneOrEmail, 'password': password};
+  }
+}
+
+class UserRegisterDataModel {
+  final String username;
+  final String phone;
+  final String email;
+  final String password;
+
+  UserRegisterDataModel({
+    required this.username,
+    required this.phone,
+    required this.email,
+    required this.password,
+  });
+  Map<String, dynamic> toJson() {
+    return {
+      'username': username,
+      'phone': phone,
+      'email': email,
+      'password': password,
+    };
+  }
+}

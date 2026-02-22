@@ -43,6 +43,7 @@ dependencies:
   shimmer: ^3.0.0
   carousel_slider: ^5.1.1
   flutter_secure_storage: ^10.0.0
+  network_info_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:
@@ -70,7 +71,6 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-    - assets/datas/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

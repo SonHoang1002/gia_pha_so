@@ -5,6 +5,12 @@ abstract class AppDataEvent {
 }
 
 class UpdateAppDataEvent extends AppDataEvent {
+  final String token;
+  final String refreshToken;
   final UserEntity userEntity;
-  UpdateAppDataEvent({required this.userEntity});
+  UpdateAppDataEvent({
+    required this.token,
+    required this.refreshToken,
+    required this.userEntity,
+  });
 }

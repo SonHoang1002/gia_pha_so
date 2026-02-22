@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class FamilyTreeMain extends StatefulWidget {
-  const FamilyTreeMain({super.key});
+class FamilyTreeScreen extends StatefulWidget {
+  const FamilyTreeScreen({super.key});
 
   @override
-  State<FamilyTreeMain> createState() => _FamilyTreeMainState();
+  State<FamilyTreeScreen> createState() => _FamilyTreeScreenState();
 }
 
-class _FamilyTreeMainState extends State<FamilyTreeMain> {
+class _FamilyTreeScreenState extends State<FamilyTreeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

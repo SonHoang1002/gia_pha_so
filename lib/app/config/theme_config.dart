@@ -76,8 +76,6 @@ class MyThemes {
     colorScheme: ColorScheme.light(
       primary: primaryLight,
       onPrimary: onPrimaryLight,
-      background: backgroundLight,
-      onBackground: onBackgroundLight,
       surface: surfaceLight,
       onSurface: onSurfaceLight,
       error: errorLight,
@@ -146,8 +144,6 @@ class MyThemes {
     colorScheme: ColorScheme.dark(
       primary: primaryDark,
       onPrimary: onPrimaryDark,
-      background: backgroundDark,
-      onBackground: onBackgroundDark,
       surface: surfaceDark,
       onSurface: onSurfaceDark,
       error: errorDark,

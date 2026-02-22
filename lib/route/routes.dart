@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gia_pha_so/src/presentation/screen/family_tree_page.dart';
 import 'package:gia_pha_so/src/presentation/screen/home_page.dart';
 import 'package:gia_pha_so/src/presentation/screen/auth_page.dart';
 import 'package:gia_pha_so/src/presentation/screen/root_page.dart';
@@ -6,8 +7,8 @@ import 'package:gia_pha_so/src/presentation/screen/root_page.dart';
 class RouteNames {
   // Auth Routes
   static const String root = '/';
-  static const String login = '/login';
-  static const String register = '/register';
+  static const String login = '/auth/login';
+  static const String register = '/auth/register';
   static const String forgotPassword = '/forgot-password';
   static const String resetPassword = '/reset-password';
 
@@ -66,14 +67,6 @@ class RouteNames {
 class AppRoutes {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
-      // Auth Routes
-      // case RouteNames.login:
-      //   return _buildRoute(settings, const AuthScreen());
-      // case RouteNames.register:
-      //   return _buildRoute(settings, const RegisterScreen());
-      // case RouteNames.forgotPassword:
-      //   return _buildRoute(settings, const ForgotPasswordScreen());
-
       // Main Routes
       case RouteNames.root:
         return _buildRoute(settings, const RootScreen());
@@ -81,8 +74,8 @@ class AppRoutes {
         return _buildRoute(settings, const HomeScreen());
 
       // Family Routes
-      // case RouteNames.familyTree:
-      //   return _buildRoute(settings, const FamilyTreeScreen());
+      case RouteNames.familyTree:
+        return _buildRoute(settings, const FamilyTreeScreen());
       // case RouteNames.familyMembers:
       //   return _buildRoute(settings, const FamilyMembersScreen());
       // case RouteNames.familyDetail:

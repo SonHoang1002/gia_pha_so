@@ -22,16 +22,23 @@ class BlocUtil {
   static ThemeBloc getThemeBloc(BuildContext context, {bool listen = false}) {
     return BlocProvider.of<ThemeBloc>(context, listen: listen);
   }
+
   static void setThemeByMode(BuildContext context, ThemeMode mode) {
     return BlocProvider.of<ThemeBloc>(context).setThemeByMode(mode);
-
   }
 
-  static void handleUpdateAppData(BuildContext context, UserEntity userEntity) {
-    return BlocProvider.of<AppDataBloc>(
-      context,
-    ).add(UpdateAppDataEvent(userEntity: userEntity));
+  static void handleUpdateAppData(
+    BuildContext context,
+    UserEntity userEntity, {
+    String token = "",
+    String refreshToken = "",
+  }) {
+    return BlocProvider.of<AppDataBloc>(context).add(
+      UpdateAppDataEvent(
+        userEntity: userEntity,
+        token: token,
+        refreshToken: refreshToken,
+      ),
+    );
   }
-
-   
 }

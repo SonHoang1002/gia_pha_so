@@ -1,7 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:gia_pha_so/app/util/bloc_util.dart';
-import 'package:gia_pha_so/src/data/datasource/user_datasrc.dart';
-import 'package:gia_pha_so/src/data/repository/user_repository_impl.dart';
+import 'package:gia_pha_so/route/routes.dart';
+import 'package:gia_pha_so/src/data/datasource/auth_datasrc.dart';
+import 'package:gia_pha_so/src/data/model/user_model.dart';
+import 'package:gia_pha_so/src/data/repository/auth_repository_impl.dart';
+import 'package:gia_pha_so/src/domain/entity/user_entity.dart';
+import 'package:gia_pha_so/src/presentation/widget/auth/w_sign_in.dart';
+import 'package:gia_pha_so/src/presentation/widget/auth/w_sign_up.dart';
+import 'package:gia_pha_so/src/presentation/widget/notification/w_snack_bar.dart';
 import 'package:gia_pha_so/src/presentation/widget/w_theme_switch.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -13,11 +21,70 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isSignIn = true; // Mặc định hiển thị Sign In
+  late AuthRepositoryImpl authRepositoryImpl;
 
   void _toggleAuthMode() {
     setState(() {
       _isSignIn = !_isSignIn;
     });
+  }
+
+  Future<void> _onSubmitSignIn(String phoneOrEmail, String password) async {
+    final result = await authRepositoryImpl.login(
+      UserLoginDataModel(password: password, phoneOrEmail: phoneOrEmail),
+    );
+  
+    final body = jsonDecode(result.body);
+
+    if (body['error'] != null) {
+      showErrorSnackBar(
+        context,
+        "Đăng nhập không thành công: ${body['error']}",
+      );
+      return;
+    }
+    final data = body["data"];
+    BlocUtil.handleUpdateAppData(
+      context,
+      UserEntity.fromJson(data?["user"] ?? {}),
+      token: data?["token"] ?? "",
+      refreshToken: data?["refreshToken"] ?? "",
+    );
+    showSuccessSnackBar(context, "Đăng nhập thành công");
+    Navigator.pushReplacementNamed(context, RouteNames.home);
+  }
+
+  Future<void> _onSubmitSignUp(
+    String name,
+    String email,
+    String phone,
+    String password,
+  ) async {
+    print("_onSubmitSignUp call");
+    final result = await authRepositoryImpl.register(
+      UserRegisterDataModel(
+        username: name,
+        phone: phone,
+        email: email,
+        password: password,
+      ),
+    );
+    final resultBody = jsonDecode(result?.body);
+    if (resultBody?["error"] != null) {
+      showErrorSnackBar(context, resultBody["error"]);
+      return;
+    }
+    if (resultBody?["success"] != null) {
+      showSuccessSnackBar(context, "Đăng ký thành công");
+      _toggleAuthMode();
+      return;
+    }
+  }
+
+  @override
+  void initState() {
+    authRepositoryImpl = AuthRepositoryImpl(authDataSource: AuthDataSource());
+    super.initState();
   }
 
   @override
@@ -46,7 +113,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     const SizedBox(height: 40),
 
                     // Auth Form
-                    _isSignIn ? const SignInForm() : const SignUpForm(),
+                    _isSignIn
+                        ? SignInForm(onSubmit: _onSubmitSignIn)
+                        : SignUpForm(onSubmit: _onSubmitSignUp),
                     const SizedBox(height: 24),
 
                     // Toggle Auth Mode
@@ -195,495 +264,6 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-// ========== SIGN IN FORM ==========
-class SignInForm extends StatefulWidget {
-  const SignInForm({super.key});
-
-  @override
-  State<SignInForm> createState() => _SignInFormState();
-}
-
-class _SignInFormState extends State<SignInForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool _isLoading = false;
-  bool _rememberMe = false;
-  bool _showPassword = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Email/Username
-          TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'Email hoặc tên đăng nhập',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.email_outlined),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập email/username';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Password
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Mật khẩu',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.lock_outlined),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _showPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _showPassword = !_showPassword;
-                  });
-                },
-              ),
-            ),
-            obscureText: !_showPassword,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập mật khẩu';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 12),
-
-          // Remember me & Forgot password
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Remember me
-              Row(
-                children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (value) {
-                      setState(() {
-                        _rememberMe = value ?? false;
-                      });
-                    },
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  Text(
-                    'Ghi nhớ',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-
-              // Forgot password
-              TextButton(
-                onPressed: _forgotPassword,
-                style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                child: Text(
-                  'Quên mật khẩu?',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Sign In Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isLoading ? null : _signIn,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Đăng nhập',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _signIn() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // TODO: Call API
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Navigate to home
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      _showError('Đăng nhập thất bại');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  void _forgotPassword() {
-    Navigator.pushNamed(context, '/forgot-password');
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
-    );
-  }
-}
-
-// ========== SIGN UP FORM ==========
-class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
-
-  @override
-  State<SignUpForm> createState() => _SignUpFormState();
-}
-
-class _SignUpFormState extends State<SignUpForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
-  bool _isLoading = false;
-  bool _showPassword = false;
-  bool _showConfirmPassword = false;
-  bool _agreeToTerms = false;
-  late UserRepositoryImpl userRepositoryImpl;
-
-  @override
-  void initState() {
-    userRepositoryImpl = UserRepositoryImpl(UserDataSource());
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void _signUp() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await Future.delayed(const Duration(seconds: 1));
-      final result = await userRepositoryImpl.createUser(
-        name: _nameController.text.trim(),
-        password: _passwordController.text.trim(),
-        email: _emailController.text.trim(),
-      );
-      BlocUtil.handleUpdateAppData(context, result);
-
-      _showSuccess('Đăng ký thành công! Vui lòng kiểm tra email.');
-    } catch (e) {
-      _showError('Đăng ký thất bại: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          // Name
-          TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: 'Họ và tên',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.person_outlined),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập họ tên';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Email
-          TextFormField(
-            controller: _emailController,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.email_outlined),
-            ),
-            keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập email';
-              }
-              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                return 'Email không hợp lệ';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Password
-          TextFormField(
-            controller: _passwordController,
-            decoration: InputDecoration(
-              labelText: 'Mật khẩu',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.lock_outlined),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _showPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _showPassword = !_showPassword;
-                  });
-                },
-              ),
-            ),
-            obscureText: !_showPassword,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng nhập mật khẩu';
-              }
-              if (value.length < 6) {
-                return 'Mật khẩu phải có ít nhất 6 ký tự';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Confirm Password
-          TextFormField(
-            controller: _confirmPasswordController,
-            decoration: InputDecoration(
-              labelText: 'Xác nhận mật khẩu',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              prefixIcon: const Icon(Icons.lock_outlined),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _showConfirmPassword
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _showConfirmPassword = !_showConfirmPassword;
-                  });
-                },
-              ),
-            ),
-            obscureText: !_showConfirmPassword,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Vui lòng xác nhận mật khẩu';
-              }
-              if (value != _passwordController.text) {
-                return 'Mật khẩu không khớp';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-
-          // Terms & Conditions
-          Row(
-            children: [
-              Checkbox(
-                value: _agreeToTerms,
-                onChanged: (value) {
-                  setState(() {
-                    _agreeToTerms = value ?? false;
-                  });
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              Expanded(
-                child: Wrap(
-                  children: [
-                    Text(
-                      'Tôi đồng ý với ',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: _showTerms,
-                      child: Text(
-                        'điều khoản sử dụng',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Sign Up Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: (_isLoading || !_agreeToTerms) ? null : _signUp,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: _isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Đăng ký',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showTerms() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Điều khoản sử dụng'),
-        content: SingleChildScrollView(
-          child: Text(
-            'Nội dung điều khoản sử dụng...',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
-    );
-  }
-
-  void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
-    );
-  }
-}
-
-// ========== SOCIAL LOGIN BUTTON ==========
 class SocialLoginButton extends StatelessWidget {
   final dynamic icon;
   final bool isIcon;

@@ -11,14 +11,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.red,
-      body: Center(
-        child: Container(
-          child: Text("Login Page"),
-        ),
+      backgroundColor: Colors.black,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            "Home Screen",
+            style: TextStyle(color: Colors.white, fontSize: 24),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/family-tree');
+            },
+            child: const Text("Gia pha của bạn"),
+          ),
+        ],
       ),
     );
   }
 }
-
-

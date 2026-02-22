@@ -1,4 +1,5 @@
 import 'package:gia_pha_so/src/data/datasource/user_datasrc.dart';
+import 'package:gia_pha_so/src/data/model/user_model.dart';
 import 'package:gia_pha_so/src/domain/entity/user_entity.dart';
 import 'package:gia_pha_so/src/domain/repository/user_repository.dart';
 
@@ -22,16 +23,20 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<UserEntity> getUserByName({
-    required String name,
-    required String password,
-    required String email,
+  Future<UserEntity?> getUserByEmailOrName({
+    required String emailOrName,
+    required String password, 
   }) async {
     final userModel = await userDataSource.getUserByUser(
-      name: name,
-      password: password,
-      email: email,
+      emailOrName: emailOrName,
+      password: password, 
     );
-    return userModel.toEntity;
+    return userModel?.toEntity;
+  }
+  
+  @override
+  Future<List<UserEntity>> getUsers() async{
+     List<UserModel> listUserMosel =  await userDataSource.getUsers( );
+     return listUserMosel.map((e) => e.toEntity).toList();
   }
 }

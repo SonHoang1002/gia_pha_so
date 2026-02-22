@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gia_pha_so/material_with_theme.dart';
 import 'package:gia_pha_so/src/presentation/bloc/app_data_bloc.dart';
-import 'package:gia_pha_so/src/presentation/bloc/state/app_data_state.dart';
 import 'package:gia_pha_so/src/presentation/bloc/theme_bloc.dart';
 import 'package:logger/logger.dart';
 

@@ -10,6 +10,7 @@ class InitAppDataState extends AppDataState {
 }
 
 class UpdateAppDataState extends AppDataState {
+  @override
   final UserEntity userEntity;
   UpdateAppDataState({required this.userEntity}) : super(userEntity: userEntity);
 }
