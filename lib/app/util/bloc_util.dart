@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gia_pha_so/src/domain/entity/user_entity.dart';
-import 'package:gia_pha_so/src/presentation/bloc/app_data_bloc.dart';
-import 'package:gia_pha_so/src/presentation/bloc/event/app_data_event.dart';
-import 'package:gia_pha_so/src/presentation/bloc/state/app_data_state.dart';
-import 'package:gia_pha_so/src/presentation/bloc/theme_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/app_data_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/event/app_data_event.dart';
+import 'package:gia_pha_so/src/presentation/provider/state/app_data_state.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/theme_bloc.dart';
 
 class BlocUtil {
   static bool getIsDarkMode(BuildContext context, {bool listen = false}) =>

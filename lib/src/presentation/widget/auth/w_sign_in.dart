@@ -11,7 +11,7 @@ class SignInForm extends StatefulWidget {
 class _SignInFormState extends State<SignInForm> {
   final _formKey = GlobalKey<FormState>();
   final _phoneOrEmailController = TextEditingController(
-    text: "admin@gmail.com",
+    text: "admin1@gmail.com",
   );
   final _passwordController = TextEditingController(text: "Admin123@");
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gia_pha_so/material_with_theme.dart';
-import 'package:gia_pha_so/src/presentation/bloc/app_data_bloc.dart';
-import 'package:gia_pha_so/src/presentation/bloc/theme_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/app_data_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/bubble_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/theme_bloc.dart';
 import 'package:logger/logger.dart';
 
 Logger logger = Logger();
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider<AppDataBloc>(create: (_) => AppDataBloc()),
           BlocProvider<ThemeBloc>(create: (_) => ThemeBloc()),
+          BlocProvider<BubbleBloc>(create: (_) => BubbleBloc()),
         ],
         child: const MaterialWithTheme(),
       ),

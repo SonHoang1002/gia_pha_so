@@ -111,20 +111,6 @@ class UserEntity {
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
   ).hasMatch(name);
   
-  // Tạo user mẫu (dùng cho testing)
-  static UserEntity get sample => UserEntity(
-    name: 'Nguyen Van A',
-    password: 'password123',
-    email: 'nguyenvana@gmail.com',
-  );
-  
-  // Tạo list users mẫu
-  static List<UserEntity> get samples => [
-    UserEntity(name: 'admin', password: 'admin123', email: "admin@gmail.com"),
-    UserEntity(name: 'user1', password: 'user123', email: "user1@gmail.com"),
-    UserEntity(name: 'user2', password: 'user456', email: "user2@gmail.com"),
-  ];
-  
   // Chuyển đổi sang Map với key là name
   Map<String, UserEntity> toMapByUsername() {
     return {name: this};

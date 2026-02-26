@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Api {
-  static const String BASE_URL = "http://192.168.1.214:8080";
+  static const String BASE_URL = "http://192.168.1.230:8080";
   static const Duration timeout = Duration(seconds: 30);
 
   static final FlutterSecureStorage _storage = const FlutterSecureStorage();

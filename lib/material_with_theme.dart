@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gia_pha_so/app/config/theme_config.dart';
 import 'package:gia_pha_so/route/routes.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/bubble_bloc.dart';
+import 'package:gia_pha_so/src/presentation/provider/bloc/theme_bloc.dart';
+import 'package:gia_pha_so/src/presentation/widget/buddle_float_button/bubble_floating_button.dart';
 
 class MaterialWithTheme extends StatefulWidget {
   const MaterialWithTheme({super.key});
@@ -18,8 +22,7 @@ class _MaterialWithThemeState extends State<MaterialWithTheme> {
   @override
   Widget build(BuildContext context) {
     // homeWidget = const TestSharpenWidget();
-    // return BlocBuilder<ThemeBloc, ThemeState>(
-    //   builder: (context, theme) {
+    final bubbleService = context.watch<BubbleBloc>().state;
     return MaterialApp(
       title: 'Image Converter',
       theme: MyThemes.lightThemeData,
@@ -28,16 +31,27 @@ class _MaterialWithThemeState extends State<MaterialWithTheme> {
       themeMode: ThemeMode.light,
       initialRoute: RouteNames.login, // Hoặc RouteNames.login
       onGenerateRoute: AppRoutes.generateRoute,
-      // Có thể thêm navigator key để quản lý navigation từ bất kỳ đâu
       navigatorKey: NavigationService.navigatorKey,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            child!,
+            DraggableFloatingButton(
+              visible: bubbleService.isVisible,
+              snapToEdge: bubbleService.snapToEdge,
+              onTap: bubbleService.onTap,
+              child: BubbleButton(
+                onTap: bubbleService.onTap,
+                icon: bubbleService.icon,
+                color: bubbleService.color,
+              ),
+            ),
+          ],
+        );
+      },
     );
-    //   },
-    // );
   }
-
-  
 }
-
 
 // Service để truy cập navigation từ bất kỳ đâu
 class NavigationService {
@@ -74,4 +88,3 @@ class NavigationService {
     );
   }
 }
-
